@@ -58,6 +58,9 @@ public class Config {
 		if (os.equals("Windows 7") || os.equals("Windows Vista")) {
 			folder += "AppData\\Roaming\\JavaTorrent\\";
 			new File(folder).mkdirs();
+		}else{
+			folder = System.getProperty("user.home") + "/.JavaTorrent";
+			new File(folder).mkdirs();
 		}
 		configFile = new File(folder + filename);
 		if (!configFile.exists()) {

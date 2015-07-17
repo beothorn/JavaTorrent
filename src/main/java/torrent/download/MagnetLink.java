@@ -1,5 +1,6 @@
 package torrent.download;
 
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,8 +24,15 @@ public class MagnetLink {
 	private TrackerManager trackerManager;
 	
 	private Logger log;
+
+	private Consumer<String> onFinishCallback;
 	
 	public MagnetLink(String magnetLink, TorrentManager torrentManager, TrackerManager trackerManager) {
+		this(magnetLink, torrentManager, trackerManager, null);
+	}
+	
+	public MagnetLink(String magnetLink, TorrentManager torrentManager, TrackerManager trackerManager, Consumer<String> onFinishCallback) {
+		this.onFinishCallback = onFinishCallback;
 		this.torrentBuilder = new TorrentBuilder();
 		this.log = ConsoleLogger.createLogger("JavaTorrent", Level.INFO);
 		this.torrentManager = torrentManager;
@@ -76,7 +84,7 @@ public class MagnetLink {
 	public Torrent getTorrent() throws IllegalStateException {
 		if (torrent == null) {
 			try {
-				torrent = torrentBuilder.build(torrentManager, trackerManager);
+				torrent = torrentBuilder.build(torrentManager, trackerManager, onFinishCallback);
 			} catch (IllegalStateException e) {
 				log.warning("Failed to build torrent from magnet link: " + e.getMessage());
 			}

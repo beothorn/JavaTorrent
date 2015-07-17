@@ -2,6 +2,7 @@ package torrent.download;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.function.Consumer;
 
 import torrent.TorrentManager;
 import torrent.download.tracker.TrackerManager;
@@ -36,10 +37,11 @@ public class TorrentBuilder {
 	 * Creates the {@link Torrent} derived from the given parameters in previous calls
 	 * @param torrentManager
 	 * @param trackerManager
+	 * @param onFinishCallback 
 	 * @return
 	 * @throws IllegalStateException if the torrent has to few information to start downloading
 	 */
-	public Torrent build(TorrentManager torrentManager, TrackerManager trackerManager) throws IllegalStateException {
+	public Torrent build(TorrentManager torrentManager, TrackerManager trackerManager, Consumer<String> onFinishCallback) throws IllegalStateException {
 		if (btihHash == null) {
 			throw new IllegalStateException("Missing SHA-1 hash for torrent");
 		}
@@ -48,7 +50,7 @@ public class TorrentBuilder {
 			throw new IllegalStateException("Missing trackers for torrent");
 		}
 		
-		Torrent torrent = new Torrent(torrentManager, trackerManager, btihHash, displayName);
+		Torrent torrent = new Torrent(torrentManager, trackerManager, btihHash, displayName, onFinishCallback);
 		
 		trackers.forEach(trackerUrl -> {
 			trackerManager.addTorrent(torrent, trackerUrl);

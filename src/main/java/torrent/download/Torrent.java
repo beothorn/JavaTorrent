@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -125,11 +126,14 @@ public class Torrent implements Runnable {
 	 */
 	private Thread thread;
 
+	private Consumer<String> onFinishCallback;
+
 	public static final byte STATE_DOWNLOAD_METADATA = 0;
 	public static final byte STATE_DOWNLOAD_DATA = 1;
 	public static final byte STATE_UPLOAD = 2;
 
-	public Torrent(TorrentManager manager, TrackerManager trackerManager, byte[] btihHash, String displayName) {
+	public Torrent(TorrentManager manager, TrackerManager trackerManager, byte[] btihHash, String displayName, Consumer<String> onFinishCallback) {
+		this.onFinishCallback = onFinishCallback;
 		log = ConsoleLogger.createLogger(String.format("Torrent %s", StringUtil.byteArrayToString(btihHash)), Level.INFO);
 		this.displayName = displayName;
 		this.manager = manager;
@@ -173,6 +177,7 @@ public class Torrent implements Runnable {
 		thread.start();
 	}
 
+	@Override
 	public void run() {
 		while(phase != null) {
 			torrentStatus = phase.getId();
@@ -191,6 +196,9 @@ public class Torrent implements Runnable {
 			phase = phase.nextPhase();
 		}
 		log.info("Torrent has finished");
+		if(onFinishCallback != null){
+			onFinishCallback.accept(displayName);
+		}
 	}
 
 	/**
